@@ -1,23 +1,23 @@
 FROM ruby:2.3
 
-# install sqlite3
-RUN apt-get install -y --no-install-recommends libsqlite3-dev
+ENV LANG=C.UTF-8 \
+    RAILS_LOG_TO_STDOUT=yes_please \
+    APP_HOME=/geoblacklight \
+    BUNDLE_GEMFILE=/geoblacklight/Gemfile \
+    BUNDLE_JOBS=2 \
+    BUNDLE_PATH=/bundle
 
-# install node
-RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
-RUN apt-get install -y --no-install-recommends nodejs
+# install node.js v7 and postgres libraries
+# nb it isn't necessary to run "apt-get update" because this runs via the nodesource script
+RUN curl -sL https://deb.nodesource.com/setup_7.x | bash - \
+    && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    nodejs \
+    && apt-get clean \
+	&& rm -rf /var/lib/apt/lists/*
 
-ENV APP_HOME /geoblacklight
+ADD docker-entrypoint.sh $APP_HOME/docker-entrypoint.sh
 
-RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
-ADD Gemfile* $APP_HOME/
-
-ENV BUNDLE_GEMFILE=$APP_HOME/Gemfile \
-  BUNDLE_JOBS=2 \
-  BUNDLE_PATH=/geoblacklight_bundle
-
-RUN bundle install
-
-ADD startup.sh $APP_HOME/
+ENTRYPOINT $APP_HOME/docker-entrypoint.sh
