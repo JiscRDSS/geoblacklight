@@ -1,0 +1,6 @@
+log/
+tmp/
+.git
+.env
+.env.*
+public/assets/
